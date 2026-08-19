@@ -88,9 +88,22 @@ npm run dist:win         # NSIS installer + zip
 
 `dist:win` **must run on Windows, or on Linux with wine installed** — electron-builder rewrites the
 executable's resources, and without wine it stops with `wine is required`. Cross-built installers
-that nobody has run are worth little anyway, so the intended home for it is a Windows CI runner;
-the workflow for that is written but not yet enabled here (pushing a `.github/workflows` file needs
-a token with the `workflow` scope: `gh auth refresh -s workflow`).
+that nobody has run are worth little anyway, so the real home for it is CI:
+
+```sh
+gh workflow run build.yml        # or push a v* tag
+```
+
+`.github/workflows/build.yml` runs the tests, then builds on an Ubuntu runner and a Windows runner,
+compiling `lwk_wasm` from SWK first — so a green run proves the whole chain, Rust to wasm to
+installer, rather than only the JavaScript. It produces:
+
+| | |
+|---|---|
+| `Seqognito-<version>-win-x64.exe` | NSIS installer, choose-your-directory, per-user |
+| `Seqognito-<version>-win-x64.zip` | portable |
+| `Seqognito-<version>-linux-x86_64.AppImage` | |
+| `Seqognito-<version>-linux-amd64.deb` | |
 
 ## Tests
 
