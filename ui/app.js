@@ -344,7 +344,12 @@ async function renderMix(){
     mixLanes.forEach((l, i) => {
       const d = el('div', 'kv');
       d.appendChild(el('span', 'k', l.label));
-      d.appendChild(el('span', 'v', `${fmt(l.denom)} per denomination · ${l.participants} waiting · closes in ${Math.round(l.deadlineMs / 1000)}s`));
+      // The honest description of each state. A round with nobody in it is not broken and not
+      // closing — it is waiting for someone, and that someone can be you.
+      const state = l.waiting
+        ? (l.participants >= 1 ? `${l.participants} here, needs ${l.minParticipants - l.participants} more` : 'nobody here yet — be the first')
+        : (l.deadlineMs != null ? `${l.participants} in, closes in ${Math.max(0, Math.round(l.deadlineMs / 1000))}s` : `${l.participants} in`);
+      d.appendChild(el('span', 'v', `${fmt(l.denom)} per denomination · ${state}`));
       box.appendChild(d);
       const o = el('option', null, `${l.label} — ${fmt(l.denom)} each`); o.value = String(i); sel.appendChild(o);
     });
