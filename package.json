@@ -4,7 +4,10 @@
   "description": "A mixing wallet for Sequentia: CoinJoin over confidential transactions, every byte over Tor.",
   "main": "main.cjs",
   "license": "MIT",
-  "author": "GracedEternalKingCabbageMan",
+  "author": {
+    "name": "GracedEternalKingCabbageMan",
+    "email": "151803062+GracedEternalKingCabbageMan@users.noreply.github.com"
+  },
   "scripts": {
     "start": "electron .",
     "test": "node --test 'test/**/*.test.mjs'",
@@ -21,10 +24,42 @@
     "appId": "org.sequentia.seqognito",
     "productName": "Seqognito",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
-    "files": ["main.cjs", "preload.cjs", "tor.cjs", "gateway.cjs", "store.cjs", "ui/**/*", "!ui/**/*.map"],
-    "directories": { "output": "dist", "buildResources": "build" },
-    "linux": { "target": ["AppImage", "deb"], "category": "Finance", "icon": "build/icon.png" },
-    "win": { "target": ["nsis", "zip"], "icon": "build/icon.png" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false }
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "tor.cjs",
+      "gateway.cjs",
+      "store.cjs",
+      "ui/**/*",
+      "!ui/**/*.map"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Finance",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GracedEternalKingCabbageMan/seqognito.git"
   }
 }
