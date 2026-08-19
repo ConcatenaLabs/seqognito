@@ -82,9 +82,15 @@ npm run sync-wasm
 Packaging:
 
 ```sh
-npm run dist:linux       # AppImage + deb
+npm run dist:linux       # AppImage + deb — verified: 117 MB AppImage, boots
 npm run dist:win         # NSIS installer + zip
 ```
+
+`dist:win` **must run on Windows, or on Linux with wine installed** — electron-builder rewrites the
+executable's resources, and without wine it stops with `wine is required`. Cross-built installers
+that nobody has run are worth little anyway, so the intended home for it is a Windows CI runner;
+the workflow for that is written but not yet enabled here (pushing a `.github/workflows` file needs
+a token with the `workflow` scope: `gh auth refresh -s workflow`).
 
 ## Tests
 
