@@ -1,0 +1,6 @@
+node_modules/
+dist/
+ui/pkg/
+*.log
+config.json
+vault.json

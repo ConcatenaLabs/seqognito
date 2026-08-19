@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seqognito</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#151b23; --panel2:#1b222c; --line:#242c38; --txt:#e6edf3; --dim:#8b98a5;
+    --gold:#ffc629; --ok:#3fb950; --warn:#d29922; --err:#f85149;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--txt);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:#1d242d;color:var(--txt);padding:8px 14px}
+  button:hover{border-color:#38414f}
+  button.primary{background:var(--gold);color:#1a1300;border-color:var(--gold);font-weight:650}
+  button.primary:disabled{opacity:.45;cursor:not-allowed}
+  button.ghost{background:transparent}
+  button.small{padding:4px 9px;font-size:12.5px}
+  input,select{font:inherit;background:#0f151d;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px 11px;width:100%}
+  input:focus,select:focus{outline:none;border-color:#3a4553}
+  label.lbl{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin:0 0 7px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .sub{color:var(--dim);font-size:13px;margin:6px 0}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;word-break:break-all}
+  .hide{display:none !important}
+  .kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--dim)}
+  .status{font-size:13px;color:var(--dim);margin-top:10px;min-height:19px}
+  .status.err{color:var(--err)}
+  .status.ok{color:var(--ok)}
+  .warn{color:var(--warn)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--dim)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+  .dot.on{background:var(--ok)} .dot.off{background:var(--err)} .dot.warn{background:var(--warn)}
+
+  /* shell */
+  #shell{display:grid;grid-template-columns:210px 1fr;height:100vh}
+  nav{background:#0b1016;border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+  nav .brand{font-weight:700;letter-spacing:.02em;padding:4px 10px 16px;font-size:17px}
+  nav .brand span{color:var(--gold)}
+  nav button{background:transparent;border:none;text-align:left;color:var(--dim);padding:9px 11px;border-radius:8px}
+  nav button.active{background:#161d26;color:var(--txt)}
+  nav .spacer{flex:1}
+  main{overflow:auto;padding:26px 30px}
+  h1{font-size:20px;margin:0 0 4px}
+  .page-sub{color:var(--dim);margin:0 0 20px;max-width:70ch}
+
+  /* full-screen views */
+  .veil{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+  .veil .card{max-width:560px;width:100%}
+  .words{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  .words div{background:#0f151d;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:ui-monospace,monospace;font-size:12.5px}
+  .words span{color:var(--dim);margin-right:6px}
+
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;color:var(--dim);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:6px 8px;border-bottom:1px solid var(--line)}
+  td{padding:8px;border-bottom:1px solid var(--line);font-size:13px}
+  tr:last-child td{border-bottom:none}
+  .tag{font-size:11px;border-radius:5px;padding:1px 6px;border:1px solid var(--line);color:var(--dim)}
+  .tag.mixed{color:var(--gold);border-color:#5a4a15}
+
+  /* mixing timeline */
+  ol.timeline{list-style:none;padding:0;margin:12px 0 0}
+  ol.timeline li{display:flex;gap:10px;align-items:flex-start;padding:5px 0;color:var(--dim);font-size:13px}
+  ol.timeline li .bullet{width:9px;height:9px;border-radius:50%;background:#2a3341;margin-top:6px;flex:none}
+  ol.timeline li.done{color:var(--txt)} ol.timeline li.done .bullet{background:var(--ok)}
+  ol.timeline li.now{color:var(--gold)} ol.timeline li.now .bullet{background:var(--gold)}
+</style>
+</head>
+<body>
+
+<!-- ============ unlock / onboarding ============ -->
+<div class="veil" id="veilLock">
+  <div class="card">
+    <div class="brand" style="font-size:20px;font-weight:700;margin-bottom:2px">Seq<span style="color:#ffc629">ognito</span></div>
+    <p class="sub" id="lockIntro">A mixing wallet for Sequentia. Everything it does goes over Tor.</p>
+    <div id="lockUnlock">
+      <label class="lbl">Passphrase</label>
+      <input id="lockPass" type="password" placeholder="unlock this wallet" autocomplete="off">
+      <div class="row" style="margin-top:12px"><button class="primary" id="lockGo">Unlock</button></div>
+    </div>
+    <div id="lockNew" class="hide">
+      <div class="row"><button class="primary" id="newCreate">Create a wallet</button><button class="ghost" id="newRestore">Restore from a phrase</button></div>
+    </div>
+    <div class="status" id="lockStatus"></div>
+  </div>
+</div>
+
+<!-- ============ create / restore ============ -->
+<div class="veil hide" id="veilNew">
+  <div class="card">
+    <h1 id="newTitle">Your recovery phrase</h1>
+    <p class="sub" id="newSub">Twelve words. They are the wallet: anyone who has them has the coins, and nobody can
+      give them back to you. Write them down on paper, off this machine.</p>
+    <div class="words" id="newWords"></div>
+    <div id="restoreBox" class="hide">
+      <label class="lbl">Recovery phrase</label>
+      <input id="restoreWords" placeholder="twelve words, separated by spaces" autocomplete="off">
+    </div>
+    <label class="lbl" style="margin-top:14px">Passphrase for this machine</label>
+    <p class="sub" style="margin-top:0">Encrypts the phrase in a file on this computer. It is not part of the recovery
+      phrase and it cannot be recovered — forget it and you restore from the twelve words instead.</p>
+    <div class="row">
+      <input id="newPass" type="password" placeholder="at least 8 characters" style="flex:1 1 200px">
+      <input id="newPass2" type="password" placeholder="again" style="flex:1 1 200px">
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="newSave">Save wallet</button>
+      <button class="ghost" id="newCancel">Back</button>
+    </div>
+    <div class="status" id="newStatus"></div>
+  </div>
+</div>
+
+<!-- ============ first-run connection setup ============ -->
+<div class="veil hide" id="veilSetup">
+  <div class="card">
+    <h1>Where should this wallet connect?</h1>
+    <p class="sub">Seqognito talks to nodes you choose, and only through Tor. Point it at your own Sequentia and Bitcoin
+      Esplora endpoints (an <span class="mono">.onion</span> address is ideal — nothing outside Tor ever sees the request),
+      or at ones you trust.</p>
+    <div id="setupFields"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="setupSave">Connect</button>
+      <button class="ghost" id="setupProbe">Re-check Tor</button>
+    </div>
+    <div class="status" id="setupStatus"></div>
+  </div>
+</div>
+
+<!-- ============ the wallet ============ -->
+<div id="shell" class="hide">
+  <nav>
+    <div class="brand">Seq<span>ognito</span></div>
+    <button data-page="balance" class="active">Balance</button>
+    <button data-page="receive">Receive</button>
+    <button data-page="send">Send</button>
+    <button data-page="mix">Mix</button>
+    <button data-page="network">Network</button>
+    <button data-page="settings">Settings</button>
+    <div class="spacer"></div>
+    <div class="pill" id="torPill"><span class="dot" id="torDot"></span><span id="torText">Tor</span></div>
+    <button class="ghost small" id="btnLock" style="margin-top:10px">Lock</button>
+  </nav>
+
+  <main>
+    <!-- balance -->
+    <section data-page="balance">
+      <h1>Balance</h1>
+      <p class="page-sub">Bitcoin on the parent chain and every Sequentia asset you hold, from one recovery phrase and
+        one address. Coins that have been through a mix are marked; the wallet keeps them apart from the rest.</p>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <label class="lbl" style="margin:0">Assets</label>
+          <button class="small ghost" id="btnSync">Refresh</button>
+        </div>
+        <div id="balList"><p class="sub">Not scanned yet.</p></div>
+        <div class="status" id="balStatus"></div>
+      </div>
+      <div class="card">
+        <label class="lbl">Coins</label>
+        <p class="sub" style="margin-top:0">A mixed coin spent alongside an unmixed one links them back together. That is
+          the commonest way people undo their own mixing, so the wallet shows you which is which.</p>
+        <div id="coinList"><p class="sub">—</p></div>
+      </div>
+    </section>
+
+    <!-- receive -->
+    <section data-page="receive" class="hide">
+      <h1>Receive</h1>
+      <p class="page-sub">The same address receives parent-chain Bitcoin and Sequentia assets — on Sequentia the
+        transparent address is byte-identical to a Bitcoin one. A blinded address is the opt-in private form; only
+        Sequentia assets can be sent to it.</p>
+      <div class="card">
+        <label class="lbl">Your address</label>
+        <div class="mono" id="recvAddr" style="margin-bottom:10px">—</div>
+        <div class="row">
+          <button class="small" id="recvCopy">Copy</button>
+          <button class="small ghost" id="recvNext">New address</button>
+          <button class="small ghost" id="recvConf">Show blinded</button>
+        </div>
+        <div class="status" id="recvStatus"></div>
+      </div>
+    </section>
+
+    <!-- send -->
+    <section data-page="send" class="hide">
+      <h1>Send</h1>
+      <p class="page-sub">Ordinary payments. Nothing here is private by itself — a payment straight out of a mixed coin
+        tells the recipient which mixed coin is yours.</p>
+      <div class="card">
+        <label class="lbl">Asset</label>
+        <select id="sendAsset"></select>
+        <label class="lbl" style="margin-top:12px">To</label>
+        <input id="sendTo" placeholder="tb1… , tsqb1… (blinded) or a Bitcoin address" autocomplete="off">
+        <label class="lbl" style="margin-top:12px">Amount</label>
+        <input id="sendAmt" placeholder="0.00" autocomplete="off">
+        <div class="row" style="margin-top:14px"><button class="primary" id="sendGo">Review</button></div>
+        <div class="status" id="sendStatus"></div>
+      </div>
+      <div class="card hide" id="sendReview">
+        <label class="lbl">Confirm</label>
+        <div id="sendReviewRows"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" id="sendConfirm">Sign &amp; broadcast</button>
+          <button class="ghost" id="sendCancel">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- mix -->
+    <section data-page="mix" class="hide">
+      <h1>Mix</h1>
+      <p class="page-sub">Your coins go into one transaction with other people's, and come out somewhere nobody can
+        follow. On Sequentia the amounts are hidden too — every output of the round, your change included, is a blinded
+        commitment — so there are no equal-value denominations on the chain to count and no change output to spot.</p>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div>
+            <label class="lbl" style="margin:0 0 4px">Circuits</label>
+            <div class="sub" style="margin:0">Your coins and your mixed addresses are registered over
+              <b>different Tor circuits</b>, each rotated before use. That separation is the reason this is a desktop
+              application: the coordinator sees two unrelated strangers instead of one IP address twice.</div>
+          </div>
+          <button class="small ghost" id="mixRotate">New circuits</button>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <span class="pill"><span class="dot on"></span>coins → <span class="mono" id="circIn">cj-input</span></span>
+          <span class="pill"><span class="dot on"></span>addresses → <span class="mono" id="circOut">cj-output</span></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <label class="lbl" style="margin:0">Open rounds</label>
+          <button class="small ghost" id="mixRefresh">Refresh</button>
+        </div>
+        <div id="mixLanes"><p class="sub">Looking…</p></div>
+      </div>
+
+      <div class="card hide" id="mixPlanCard">
+        <label class="lbl">Mix</label>
+        <div class="row">
+          <select id="mixLane" style="flex:2 1 240px"></select>
+          <input id="mixCount" type="number" min="1" step="1" value="1" style="flex:0 1 110px">
+        </div>
+        <div class="sub" id="mixPlan"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" id="mixGo">Start mixing</button>
+        </div>
+        <ol class="timeline" id="mixTimeline"></ol>
+        <div class="status" id="mixStatus"></div>
+      </div>
+
+      <div class="card hide" id="mixBtcCard">
+        <label class="lbl">Mix Bitcoin</label>
+        <p class="sub" style="margin-top:0">Bitcoin has no confidential transactions, which is exactly why this is worth
+          doing on Sequentia. Your BTC is bridged in, mixed, and sent back out to an address of yours that has never been
+          used. Be clear about the cost: the bridge is a custodian while the coins are pegged and it sees both ends —
+          what the mix takes away is its ability to pair them.</p>
+        <div class="row">
+          <input id="mixBtcAmt" placeholder="BTC to mix, e.g. 0.01" style="flex:2 1 200px">
+          <button class="primary" id="mixBtcGo" style="flex:0 1 150px">Mix Bitcoin</button>
+        </div>
+        <div class="status" id="mixBtcStatus"></div>
+      </div>
+
+      <div class="card">
+        <label class="lbl">Your mixes</label>
+        <div id="mixHistory"><p class="sub">None yet.</p></div>
+      </div>
+    </section>
+
+    <!-- network -->
+    <section data-page="network" class="hide">
+      <h1>Network</h1>
+      <p class="page-sub">Every request this wallet makes, and the circuit it went out on. The window itself has no
+        network access: it can reach local files and one loopback address, and nothing else — the main process refuses
+        anything else and the page's own security policy refuses it again.</p>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <label class="lbl" style="margin:0">Recent requests</label>
+          <button class="small ghost" id="netRefresh">Refresh</button>
+        </div>
+        <div id="netLog"><p class="sub">Nothing yet.</p></div>
+      </div>
+    </section>
+
+    <!-- settings -->
+    <section data-page="settings" class="hide">
+      <h1>Settings</h1>
+      <p class="page-sub">Where to connect, and how careful to be.</p>
+      <div class="card">
+        <label class="lbl">Connections</label>
+        <div id="settingsFields"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" id="settingsSave">Save</button>
+          <button class="ghost" id="settingsProbe">Check Tor</button>
+        </div>
+        <div class="status" id="settingsStatus"></div>
+      </div>
+      <div class="card">
+        <label class="lbl">Mixing</label>
+        <div class="row">
+          <div style="flex:1 1 220px">
+            <label class="lbl">Smallest anonymity set you will accept</label>
+            <input id="setMinAnon" type="number" min="2" step="1" value="3">
+            <p class="sub">A round's anonymity set is the number of people in it. The wallet checks this at the last
+              moment, after the round is final, and walks away rather than signing into a crowd of two.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="lbl">Recovery phrase</label>
+        <p class="sub" style="margin-top:0">Shown once, on request. Anyone who sees it owns these coins.</p>
+        <div class="row"><button class="ghost small" id="showPhrase">Show</button></div>
+        <div class="mono" id="phraseBox" style="margin-top:10px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

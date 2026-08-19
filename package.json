@@ -1,0 +1,30 @@
+{
+  "name": "seqognito",
+  "version": "0.1.0",
+  "description": "A mixing wallet for Sequentia: CoinJoin over confidential transactions, every byte over Tor.",
+  "main": "main.cjs",
+  "license": "MIT",
+  "author": "GracedEternalKingCabbageMan",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test 'test/**/*.test.mjs'",
+    "sync-wasm": "rm -rf ui/pkg && cp -r ../SWK/lwk_wasm/pkg ui/pkg",
+    "dist": "electron-builder --linux AppImage deb --win nsis zip",
+    "dist:linux": "electron-builder --linux AppImage deb",
+    "dist:win": "electron-builder --win nsis zip"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "org.sequentia.seqognito",
+    "productName": "Seqognito",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "files": ["main.cjs", "preload.cjs", "tor.cjs", "gateway.cjs", "store.cjs", "ui/**/*", "!ui/**/*.map"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "linux": { "target": ["AppImage", "deb"], "category": "Finance", "icon": "build/icon.png" },
+    "win": { "target": ["nsis", "zip"], "icon": "build/icon.png" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false }
+  }
+}
