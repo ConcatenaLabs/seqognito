@@ -1,0 +1,59 @@
+# Builds the desktop packages where each platform is native.
+#
+# Cross-building a Windows installer from Linux needs wine and produces something nobody has run, so
+# the Windows package is built on a Windows runner. The wasm package is not vendored in this
+# repository (it is a 12 MB build artefact with its own source of truth), so the job builds it from
+# SWK first — which means a run proves the whole chain, Rust to wasm to installer, rather than only
+# the JavaScript.
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      # The Tor circuit-isolation suite. It stands up its own SOCKS5 server and needs no network.
+      - run: npm test
+
+  package:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: --linux AppImage deb
+          - os: windows-latest
+            target: --win nsis zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: wasm32-unknown-unknown }
+      - name: Build lwk_wasm from SWK
+        shell: bash
+        run: |
+          git clone --depth 1 -b sequentia https://github.com/GracedEternalKingCabbageMan/SWK.git ../SWK
+          curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh || cargo install wasm-pack --locked
+          (cd ../SWK/lwk_wasm && wasm-pack build --target web --release)
+          rm -rf ui/pkg && cp -r ../SWK/lwk_wasm/pkg ui/pkg
+      - run: npm ci
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seqognito-${{ matrix.os }}
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.exe
+            dist/*.zip
