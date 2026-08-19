@@ -76,7 +76,10 @@ export async function lanes(){
         roundId: r.round_id, index: lane.index, asset: lane.asset, label: lane.label,
         denom: BigInt(lane.denom_atoms), coordFee: BigInt(lane.coord_fee_atoms || '0'),
         btcBacked: !!lane.btc_backed, maxCredentials: r.max_credentials,
-        participants: r.participants, minParticipants: r.min_participants, deadlineMs: r.deadline_ms,
+        participants: r.participants, minParticipants: r.min_participants,
+        // null until the round is viable — the coordinator starts no countdown while it is still
+        // waiting for the participant who makes a mix possible.
+        deadlineMs: r.deadline_ms, waiting: !!r.waiting_for_participants,
       });
     }
   }
