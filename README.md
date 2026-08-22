@@ -1,6 +1,7 @@
 # Seqognito
 
-A mixing wallet for Sequentia. Desktop, Windows and Linux, and everything it does goes over Tor.
+A mixing wallet for Sequentia. Desktop (Electron), Windows and Linux, and everything it does goes
+over Tor.
 
 It holds Bitcoin and Sequentia assets, receives, sends, and mixes. There is no trading, no staking,
 no issuance, no browser and no telemetry. Anything the mixing does not need is a surface that can
@@ -22,7 +23,8 @@ in a log file undoes all of it.
 A web page cannot fix that. It has one network stack, and the page does not choose the route. This
 application does: the two registrations go out over **different Tor circuits**, each rotated before
 use, because Tor isolates circuits by SOCKS credentials and the gateway assigns credentials by
-purpose. The coordinator sees two unrelated strangers.
+purpose. The coordinator sees two unrelated strangers. Round polling uses a third circuit that lasts
+the whole round; it names nothing, but its timing is visible to the coordinator.
 
 That is the whole reason Seqognito exists. The [browser
 wallet](https://github.com/GracedEternalKingCabbageMan/sequentia-web-wallet) runs the identical
@@ -39,9 +41,10 @@ like your mixed coins and, to an observer, is indistinguishable from them. Round
 fixed-denomination — that is what makes the blind-signature credential sound — but only the
 coordinator ever learns the number.
 
-Bitcoin itself is mixed by pegging to SBTC, mixing, and pegging back out to a fresh address. Be
-clear-eyed about that: the bridge is a custodian while your coins are pegged, and it sees the
-Bitcoin going in and the Bitcoin coming out. What the round removes is its ability to pair them.
+Bitcoin itself is mixed by bridging to SBTC, mixing, and bridging back out to a fresh address. The
+SBTC bridge is a custody bridge, not the chain's peg. Be clear-eyed about that: the bridge is a
+custodian while your coins are on Sequentia, and it sees the Bitcoin going in and the Bitcoin coming
+out. What the round removes is its ability to pair them.
 
 ## What is guaranteed, and by what
 
@@ -64,6 +67,9 @@ You need a Tor SOCKS proxy — a system `tor` daemon (port 9050) or Tor Browser 
 endpoints for Sequentia and Bitcoin testnet4. Your own node behind an `.onion` is the point;
 somebody else's is a choice you are making.
 
+To build: Node 22 (what CI uses), Rust stable with the `wasm32-unknown-unknown` target, and
+`wasm-pack`.
+
 ```sh
 npm install
 npm run sync-wasm        # copies the lwk_wasm build from ../SWK (see below)
@@ -78,6 +84,12 @@ git clone -b sequentia https://github.com/GracedEternalKingCabbageMan/SWK.git ..
 cd ../SWK/lwk_wasm && wasm-pack build --target web --release && cd -
 npm run sync-wasm
 ```
+
+`ui/pkg/` must be a copy, not a symlink: the packager follows its file list, not links, and the
+symptom is a blank window.
+
+Settings has a "Route everything over Tor" switch, on by default. Off is a development escape hatch
+for a local regtest, and the wallet says so; nothing in the table above holds while it is off.
 
 Packaging:
 
