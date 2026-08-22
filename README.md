@@ -41,10 +41,10 @@ like your mixed coins and, to an observer, is indistinguishable from them. Round
 fixed-denomination — that is what makes the blind-signature credential sound — but only the
 coordinator ever learns the number.
 
-Bitcoin itself is mixed by bridging to SBTC, mixing, and bridging back out to a fresh address. The
-SBTC bridge is a custody bridge, not the chain's peg. Be clear-eyed about that: the bridge is a
-custodian while your coins are on Sequentia, and it sees the Bitcoin going in and the Bitcoin coming
-out. What the round removes is its ability to pair them.
+Bitcoin itself is mixed by pegging to SBTC, mixing, and pegging back out to a fresh address. SBTC
+is a custody peg run by sbtc-bridge, not Elements' consensus peg. Be clear-eyed about that: the
+bridge is a custodian while your coins are pegged, and it sees the Bitcoin going in and the Bitcoin
+coming out. What the round removes is its ability to pair them.
 
 ## What is guaranteed, and by what
 
