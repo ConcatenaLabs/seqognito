@@ -23,7 +23,7 @@ Add a route to the gateway instead.
 - `ui/` — the renderer. `chain.js` is the ONLY place a URL or a purpose is named; `mix.js` is the
   mixing engine; `seqwallet.js`/`btcwallet.js` are the two chains; `app.js` is screens.
 - `ui/blindsig.js`, `ui/coinjoin-protocol.js` — **vendored from
-  [seqcj](https://github.com/GracedEternalKingCabbageMan/seqcj)**, byte-identical apart from the
+  [seqcj](https://github.com/ConcatenaLabs/seqcj)**, byte-identical apart from the
   import path. Do not edit them here; fix seqcj and re-vendor (`sync` by hand: they are
   small and the divergence risk is the point of the rule).
 - `ui/btc.js` — vendored scure-btc-signer bundle, same file the browser wallet uses. Do not edit.

@@ -43,7 +43,7 @@ jobs:
       - name: Build lwk_wasm from SWK
         shell: bash
         run: |
-          git clone --depth 1 -b sequentia https://github.com/GracedEternalKingCabbageMan/SWK.git ../SWK
+          git clone --depth 1 -b sequentia https://github.com/ConcatenaLabs/SWK.git ../SWK
           curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh || cargo install wasm-pack --locked
           (cd ../SWK/lwk_wasm && wasm-pack build --target web --release)
           rm -rf ui/pkg && cp -r ../SWK/lwk_wasm/pkg ui/pkg
