@@ -27,7 +27,7 @@ purpose. The coordinator sees two unrelated strangers. Round polling uses a thir
 the whole round; it names nothing, but its timing is visible to the coordinator.
 
 That is the whole reason Seqognito exists. The [browser
-wallet](https://github.com/GracedEternalKingCabbageMan/sequentia-web-wallet) runs the identical
+wallet](https://github.com/ConcatenaLabs/sequentia-web-wallet) runs the identical
 protocol and says plainly that it cannot do this.
 
 ## Why on Sequentia
@@ -55,7 +55,7 @@ coming out. What the round removes is its ability to pair them.
 | Coins and mixed addresses use different circuits | the purpose of a request becomes the SOCKS username (`test/gateway.test.mjs` proves it) |
 | Hostnames are never resolved locally | SOCKS5 CONNECT sends the name to the proxy — which is also what makes `.onion` work |
 | The seed is not readable from the disk | scrypt (N=2¹⁸) + AES-256-GCM, `store.cjs` |
-| The round pays what it promised | `verifyRoundOutputs`, vendored from [seqcj](https://github.com/GracedEternalKingCabbageMan/seqcj) and tested there |
+| The round pays what it promised | `verifyRoundOutputs`, vendored from [seqcj](https://github.com/ConcatenaLabs/seqcj) and tested there |
 
 And what is **not** guaranteed: your anonymity set is the round you were in. A round with two people
 in it has an anonymity set of two, whatever else is true. The wallet lets you set a floor and walks
@@ -77,10 +77,10 @@ npm start
 ```
 
 `ui/pkg/` is the `lwk_wasm` package and is not tracked — it is built from
-[SWK](https://github.com/GracedEternalKingCabbageMan/SWK):
+[SWK](https://github.com/ConcatenaLabs/SWK):
 
 ```sh
-git clone -b sequentia https://github.com/GracedEternalKingCabbageMan/SWK.git ../SWK
+git clone -b sequentia https://github.com/ConcatenaLabs/SWK.git ../SWK
 cd ../SWK/lwk_wasm && wasm-pack build --target web --release && cd -
 npm run sync-wasm
 ```
