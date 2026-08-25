@@ -94,7 +94,7 @@ for a local regtest, and the wallet says so; nothing in the table above holds wh
 Packaging:
 
 ```sh
-npm run dist:linux       # AppImage + deb — verified: 117 MB AppImage, boots
+npm run dist:linux       # AppImage + deb
 npm run dist:win         # NSIS installer + zip
 ```
 
